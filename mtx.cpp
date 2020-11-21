@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cinttypes>
 #include <cstdlib>
+#include <cstring>
 #include <zlib.h>
 #include <jpeglib.h>
 #include <png.h>
@@ -78,7 +79,66 @@ void MtxImage::decodePng(std::fstream& file) {
 }
 
 void MtxImage::encodeMtx(std::fstream& file) {
+	rgbData = new char[width * height * 3];
+	alphaData = new char[width * height];
+	char* compressedAlpha = new char[width * height];
 	
+	if (!content) {
+		std::cout << "Error: content is null pointer. Did PNG decode fail?" << std::endl;
+		exit(1);
+	}
+	
+	for (uint32_t i; i < width * height; i++) {
+		rgbData[i*3+0] = content[i*4+0];
+		rgbData[i*3+1] = content[i*4+1];
+		rgbData[i*3+2] = content[i*4+2];
+		alphaData[i]   = content[i*4+3];
+	}
+	
+	delete[] content;
+	content = nullptr;
+	
+	ZlibWrapper zlibw;
+	zlibw.init();
+	uint32_t alphaLen = zlibw.compress(alphaData, compressedAlpha, width * height);
+	
+	JpegWrapper jpegw;
+	char* jpegData = jpegw.encode(rgbData, width, height);
+	uint32_t jpegLen = jpegw.getLength();
+	
+	if (!jpegData) {
+		std::cout << "JPEG encode failed." << std::endl;
+	}
+	
+	len = 28 + 4 + jpegLen + 4 + alphaLen;
+	
+	// Since I really can't be bother to figure out another way to do this in
+	// "the C++ way" at the moment, I'm just implementing my tape for now.
+	// I will fix this :-)
+	
+	const uint8_t header[16] = {
+		0x01, 0x00, 0x00, 0x00,
+		0xFF, 0xFF, 0xFF, 0xFF,
+		0xFF, 0xFF, 0xFF, 0xFF,
+		0x01, 0x00, 0x00, 0x00
+	};
+	
+	std::cout << width << "w," << height << "h," << jpegLen << "jl," << alphaLen << "al" << std::endl;
+	
+	if (jpegLen > width * height * 3) {
+		std::cout << "Error: JPEG would be larger than the orginial, uncompressed image data." << std::endl;
+	}
+	
+	file.write((const char*) header, 16);
+	file.write((const char*) &width, 4);
+	file.write((const char*) &height, 4);
+	file.write((const char*) &jpegLen, 4);
+	file.write((const char*) jpegData, jpegLen);
+	file.write((const char*) &alphaLen, 4);
+	file.write((const char*) compressedAlpha, alphaLen);
+	
+	delete[] jpegData;
+	delete[] compressedAlpha;
 }
 
 void MtxImage::encodePng(std::fstream& file) {
@@ -109,8 +169,7 @@ MtxImage::~MtxImage() {
 namespace util {
 	char getFirstByte(std::fstream& file) {
 		char b = 0;
-		char* pb = &b;
-		file.read(pb, 1);
+		file.read(&b, 1);
 		file.seekg(0, file.beg);
 		return b;
 	}

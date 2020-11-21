@@ -36,7 +36,7 @@ uint32_t ZlibWrapper::decompress(char* input, char* output, uint32_t datalen, ui
 }
 
 uint32_t ZlibWrapper::compress(char* input, char* output, uint32_t datalen) {
-	status = deflateInit(&streamInfo, -1);
+	status = deflateInit(&streamInfo, 6);
 	if (status != Z_OK) {
 		std::cout << "Error with deflateInit(): " << status << std::endl;
 		exit(1);
@@ -48,11 +48,16 @@ uint32_t ZlibWrapper::compress(char* input, char* output, uint32_t datalen) {
 	streamInfo.next_out = (Bytef*) output;
 	
 	status = deflate(&streamInfo, Z_FINISH);
-	if (status != Z_OK) {
-		std::cout << "Warning: Zlib deflate returned " << status << " instead of Z_OK." << std::endl;
+	
+	if (status != Z_OK && status != Z_STREAM_END) {
+		std::cout << "Warning: deflate() returned " << status << " instead of Z_OK." << std::endl;
 	}
 	
-	deflateEnd(&streamInfo);
+	status = deflateEnd(&streamInfo);
+	
+	if (status == Z_DATA_ERROR) {
+		std::cout << "Warning: deflateEnd() returned Z_DATA_ERROR." << std::endl;
+	}
 	
 	outputLength = streamInfo.total_out;
 	return streamInfo.total_out;

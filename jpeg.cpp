@@ -49,13 +49,13 @@ char* JpegWrapper::decode(char* input, int32_t size) {
 }
 
 char* JpegWrapper::encode(char* input, int32_t width, int32_t height) {
-	int status, compos = 3;
-	unsigned long int size = width * height * 3;
-	unsigned char* output;
+	int compos = 3;
+	unsigned long int size = width * height * compos;
+	unsigned char* output = new unsigned char[size];
 	
 	coInfo.err = jpeg_std_error(&jpegError);
 	jpeg_create_compress(&coInfo);
-	jpeg_mem_dest(&coInfo, &output, &size);
+	jpeg_mem_dest(&coInfo, (unsigned char **) &output, &size);
 	
 	coInfo.image_width = width;
 	coInfo.image_height = height;
@@ -64,8 +64,6 @@ char* JpegWrapper::encode(char* input, int32_t width, int32_t height) {
 	
 	jpeg_set_defaults(&coInfo);
 	jpeg_start_compress(&coInfo, TRUE);
-	
-	output = new unsigned char[size];
 	
 	int rowSize = width * compos;
 	

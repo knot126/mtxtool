@@ -40,20 +40,23 @@ char* PngWrapper::encode(char* input, uint32_t width, uint32_t height) {
 }
 
 char* PngWrapper::decode(char* input, uint32_t size) {
+	int result;
+	
 	// Zero out png image struct
 	memset(&png, 0, sizeof(png_image));
 	
 	// Set up png image struct
-	png.opaque = nullptr;
 	png.version = PNG_IMAGE_VERSION;
 	
-	int result = png_image_begin_read_from_memory(&png, input, size);
+	result = png_image_begin_read_from_memory(&png, input, size);
 	
-	if (result) {
+	// Check for errors
+	if (!result) {
 		std::cout << "png_image_begin_read_from_memory failed, stat " << result << std::endl;
 		return nullptr;
 	}
 	
+	// Set properties
 	int height = png.height;
 	int width = png.width;
 	char* output = new char[width * height * 4];
@@ -61,9 +64,10 @@ char* PngWrapper::decode(char* input, uint32_t size) {
 	
 	png.format = PNG_FORMAT_RGBA;
 	
+	// Finish the reading
 	result = png_image_finish_read(&png, nullptr, output, stride, nullptr);
 	
-	if (result) {
+	if (!result) {
 		std::cout << "png_image_finish_read failed, stat " << result << std::endl;
 		return nullptr;
 	}

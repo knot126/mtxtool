@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cinttypes>
 #include <cstdlib>
+#include <cstring>
 #include <zlib.h>
 #include <jpeglib.h>
 #include <png.h>
@@ -12,7 +13,7 @@
 #include "png.hpp"
 
 int main(int argc, char* argv[]) {
-	if (argc != 3) {
+	if (argc != 4) {
 		std::cout << "Error: Please specify input and output file argument.\n";
 		exit(1);
 	}
@@ -22,13 +23,13 @@ int main(int argc, char* argv[]) {
 	std::fstream ifile;
 	std::fstream ofile;
 	
-	ifile.open(argv[1], std::ios::in | std::ios::binary);
-	ofile.open(argv[2], std::ios::out | std::ios::binary);
+	ifile.open(argv[2], std::ios::in | std::ios::binary);
+	ofile.open(argv[3], std::ios::out | std::ios::binary);
 	
 	MtxImage image;
 	char firstByte = util::getFirstByte(ifile);
 	
-	if (firstByte < 2) {
+	if (!strcmp("import", argv[1])) {
 		std::cout << "Detected MTX image; convert to PNG." << std::endl;
 		image.decodeMtx(ifile);
 		image.encodePng(ofile);
