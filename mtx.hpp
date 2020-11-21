@@ -26,3 +26,7 @@ public:
 	void showFileInfo();
 	~MtxImage();
 };
+
+namespace util {
+	char getFirstByte(std::fstream& file);
+}

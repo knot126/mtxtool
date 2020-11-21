@@ -5,7 +5,7 @@
 
 #include "zlib.hpp"
 
-void ZlibCompress::init() {
+void ZlibWrapper::init() {
 	streamInfo.zalloc = Z_NULL;
 	streamInfo.zfree = Z_NULL;
 	streamInfo.opaque = Z_NULL;
@@ -13,7 +13,7 @@ void ZlibCompress::init() {
 	streamInfo.next_in = Z_NULL;
 }
 
-uint32_t ZlibCompress::decompress(char* input, char* output, uint32_t datalen, uint32_t outlen) {
+uint32_t ZlibWrapper::decompress(char* input, char* output, uint32_t datalen, uint32_t outlen) {
 	status = inflateInit(&streamInfo);
 	if (status != Z_OK) {
 		std::cout << "Error with inflateInit(): " << status << std::endl;
@@ -35,7 +35,7 @@ uint32_t ZlibCompress::decompress(char* input, char* output, uint32_t datalen, u
 	return streamInfo.total_out;
 }
 
-uint32_t ZlibCompress::compress(char* input, char* output, uint32_t datalen) {
+uint32_t ZlibWrapper::compress(char* input, char* output, uint32_t datalen) {
 	status = deflateInit(&streamInfo, -1);
 	if (status != Z_OK) {
 		std::cout << "Error with deflateInit(): " << status << std::endl;
@@ -54,5 +54,8 @@ uint32_t ZlibCompress::compress(char* input, char* output, uint32_t datalen) {
 	
 	deflateEnd(&streamInfo);
 	
+	outputLength = streamInfo.total_out;
 	return streamInfo.total_out;
 }
+
+uint32_t ZlibWrapper::getLength() { return outputLength; }

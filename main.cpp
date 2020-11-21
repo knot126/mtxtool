@@ -26,9 +26,17 @@ int main(int argc, char* argv[]) {
 	ofile.open(argv[2], std::ios::out | std::ios::binary);
 	
 	MtxImage image;
-	image.decodeMtx(ifile);
-	image.showFileInfo();
-	image.encodePng(ofile);
+	char firstByte = util::getFirstByte(ifile);
+	
+	if (firstByte < 2) {
+		std::cout << "Detected MTX image; convert to PNG." << std::endl;
+		image.decodeMtx(ifile);
+		image.encodePng(ofile);
+	} else {
+		std::cout << "Detected PNG image; convert to MTX." << std::endl;
+		image.decodePng(ifile);
+		image.encodeMtx(ofile);
+	}
 	
 	ifile.close();
 	ofile.close();

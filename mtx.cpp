@@ -12,6 +12,7 @@
 #include "png.hpp"
 
 void MtxImage::decodeMtx(std::fstream& file) {
+	// Get file length
 	file.seekg(0, file.end);
 	len = file.tellg();
 	file.seekg(0, file.beg);
@@ -20,6 +21,7 @@ void MtxImage::decodeMtx(std::fstream& file) {
 	content = new char[len];
 	file.read(content, len);
 	
+	// Get width, height, and length of JPEG image
 	// NOTE: Again, a better way to do this would be nice...
 	width = *(int *)(content + 16);
 	height = *(int *)(content + 20);
@@ -31,13 +33,12 @@ void MtxImage::decodeMtx(std::fstream& file) {
 	alphaData = new char[width * height];
 	
 	// Decode JPEG file
-	QiJpegDecoder jpegw;
-	jpegw.init();
+	JpegWrapper jpegw;
 	char* jptr = content + 28; // do it better in the future
 	rgbData = jpegw.decode(jptr, jpegLength);
 	
 	// Decompress alpha data
-	ZlibCompress zlibw;
+	ZlibWrapper zlibw;
 	zlibw.init();
 	zlibw.decompress(content+alphaStart, alphaData, len-alphaStart, width * height);
 	
@@ -56,7 +57,24 @@ void MtxImage::decodeMtx(std::fstream& file) {
 }
 
 void MtxImage::decodePng(std::fstream& file) {
+	// Get file length
+	file.seekg(0, file.end);
+	len = file.tellg();
+	file.seekg(0, file.beg);
 	
+	// Read file content to memory
+	content = new char[len];
+	file.read(content, len);
+	
+	// Decode PNG image
+	PngWrapper pngw;
+	char* temp = pngw.decode(content, len);
+	delete[] content;
+	content = temp;
+	
+	// Set width and height
+	width = pngw.getWidth();
+	height = pngw.getHeight();
 }
 
 void MtxImage::encodeMtx(std::fstream& file) {
@@ -86,4 +104,14 @@ MtxImage::~MtxImage() {
 	if (content) { delete[] content; }
 	if (rgbData) { delete[] rgbData; }
 	if (alphaData) { delete[] alphaData; }
+}
+
+namespace util {
+	char getFirstByte(std::fstream& file) {
+		char b = 0;
+		char* pb = &b;
+		file.read(pb, 1);
+		file.seekg(0, file.beg);
+		return b;
+	}
 }
