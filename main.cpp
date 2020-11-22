@@ -18,8 +18,6 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 	
-	std::cout << "mtxtool v1.0\n";
-	
 	std::fstream ifile;
 	std::fstream ofile;
 	
@@ -27,17 +25,20 @@ int main(int argc, char* argv[]) {
 	ofile.open(argv[3], std::ios::out | std::ios::binary);
 	
 	MtxImage image;
-	char firstByte = util::getFirstByte(ifile);
 	
+#ifndef CONVERT_PNG_ONLY
 	if (!strcmp("import", argv[1])) {
-		std::cout << "Detected MTX image; convert to PNG." << std::endl;
+#endif
+		std::cout << "Converting MTX to PNG..." << std::endl;
 		image.decodeMtx(ifile);
 		image.encodePng(ofile);
-	} else {
-		std::cout << "Detected PNG image; convert to MTX." << std::endl;
+#ifndef CONVERT_PNG_ONLY
+	} else if (!strcmp("export", argv[1])) {
+		std::cout << "Converting PNG to MTX..." << std::endl;
 		image.decodePng(ifile);
 		image.encodeMtx(ofile);
 	}
+#endif
 	
 	ifile.close();
 	ofile.close();

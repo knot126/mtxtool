@@ -58,6 +58,7 @@ void MtxImage::decodeMtx(std::fstream& file) {
 }
 
 void MtxImage::decodePng(std::fstream& file) {
+#ifndef CONVERT_PNG_ONLY
 	// Get file length
 	file.seekg(0, file.end);
 	len = file.tellg();
@@ -76,9 +77,11 @@ void MtxImage::decodePng(std::fstream& file) {
 	// Set width and height
 	width = pngw.getWidth();
 	height = pngw.getHeight();
+#endif
 }
 
 void MtxImage::encodeMtx(std::fstream& file) {
+#ifndef CONVERT_PNG_ONLY
 	rgbData = new char[width * height * 3];
 	alphaData = new char[width * height];
 	char* compressedAlpha = new char[width * height];
@@ -88,7 +91,7 @@ void MtxImage::encodeMtx(std::fstream& file) {
 		exit(1);
 	}
 	
-	for (uint32_t i; i < width * height; i++) {
+	for (uint32_t i = 0; i < width * height; i++) {
 		rgbData[i*3+0] = content[i*4+0];
 		rgbData[i*3+1] = content[i*4+1];
 		rgbData[i*3+2] = content[i*4+2];
@@ -139,6 +142,7 @@ void MtxImage::encodeMtx(std::fstream& file) {
 	
 	delete[] jpegData;
 	delete[] compressedAlpha;
+#endif
 }
 
 void MtxImage::encodePng(std::fstream& file) {

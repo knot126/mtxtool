@@ -11,8 +11,8 @@ private:
 	uint32_t outputLength;
 	
 public:
-	char* encode(char* input, int32_t width, int32_t height);
-	char* decode(char* input, int32_t size);
+	char* encode(char* input, uint32_t width, uint32_t height);
+	char* decode(char* input, uint32_t size);
 	uint32_t getWidth();
 	uint32_t getHeight();
 	uint32_t getLength();

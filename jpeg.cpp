@@ -7,7 +7,7 @@
 
 #include "jpeg.hpp"
 
-char* JpegWrapper::decode(char* input, int32_t size) {
+char* JpegWrapper::decode(char* input, uint32_t size) {
 	/** @see https://gist.github.com/PhirePhly/3080633 */
 	int status;
 	unsigned char* output;
@@ -48,7 +48,8 @@ char* JpegWrapper::decode(char* input, int32_t size) {
 	return (char*) output;
 }
 
-char* JpegWrapper::encode(char* input, int32_t width, int32_t height) {
+char* JpegWrapper::encode(char* input, uint32_t width, uint32_t height) {
+#ifndef CONVERT_PNG_ONLY
 	int compos = 3;
 	unsigned long int size = width * height * compos;
 	unsigned char* output = new unsigned char[size];
@@ -75,11 +76,12 @@ char* JpegWrapper::encode(char* input, int32_t width, int32_t height) {
 	
 	jpeg_finish_compress(&coInfo);
 	
-	outputLength = (size) - (coInfo.dest->free_in_buffer);
+	outputLength = 4294967296 - ((size) - (coInfo.dest->free_in_buffer));
 	
 	jpeg_destroy_compress(&coInfo);
 	
 	return (char*) output;
+#endif
 }
 
 uint32_t JpegWrapper::getWidth()  { return outputWidth; }

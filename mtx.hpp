@@ -16,7 +16,6 @@ private:
 	uint32_t jpegLength;
 	uint32_t width;
 	uint32_t height;
-	uint32_t dataType;
 	
 public:
 	void decodeMtx(std::fstream& file); // load as mtx
