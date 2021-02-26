@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cinttypes>
 #include <jpeglib.h>
 
