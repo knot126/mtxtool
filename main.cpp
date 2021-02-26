@@ -12,8 +12,18 @@
 #include "mtx.hpp"
 #include "png.hpp"
 
+#ifndef CONVERT_PNG_ONLY
+const int MT_ARGS_COUNT = 4;
+const int MT_INFILE_LOCATION = 2;
+const int MT_OUTFILE_LOCATION = 3;
+#else
+const int MT_ARGS_COUNT = 3;
+const int MT_INFILE_LOCATION = 1;
+const int MT_OUTFILE_LOCATION = 2;
+#endif
+
 int main(int argc, char* argv[]) {
-	if (argc != 4) {
+	if (argc != MT_ARGS_COUNT) {
 		std::cout << "Error: Please specify input and output file argument.\n";
 		exit(1);
 	}
@@ -21,8 +31,8 @@ int main(int argc, char* argv[]) {
 	std::fstream ifile;
 	std::fstream ofile;
 	
-	ifile.open(argv[2], std::ios::in | std::ios::binary);
-	ofile.open(argv[3], std::ios::out | std::ios::binary);
+	ifile.open(argv[MT_INFILE_LOCATION], std::ios::in | std::ios::binary);
+	ofile.open(argv[MT_OUTFILE_LOCATION], std::ios::out | std::ios::binary);
 	
 	MtxImage image;
 	
